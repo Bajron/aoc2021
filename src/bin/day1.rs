@@ -30,6 +30,28 @@ fn main() {
         }
     }
     println!("Increase window {}: {}", WINDOW, increase_window_counter);
+
+    increase_window_counter = 0;
+    if list.len() > WINDOW {
+        for i in 0..list.len() - WINDOW {
+            let current_minus_previous = list[i + WINDOW] - list[i];
+            if current_minus_previous > 0 {
+                increase_window_counter += 1;
+            }
+        }
+    }
+    println!("Increase window {}: {}", WINDOW, increase_window_counter);
+
+    increase_window_counter = 0;
+    for (previous, current) in list.iter().zip(list.iter().skip(WINDOW)) {
+        if current > previous {
+            increase_window_counter += 1;
+        }
+    }
+    println!("Increase window {}: {}", WINDOW, increase_window_counter);
+
+    let x = list.iter().skip(list.len() + 2).fold(0, |x,y|x+y);
+    println!("{} skipped?", x)
 }
 
 fn read_ints() -> Vec<i64> {
