@@ -1,6 +1,6 @@
 use aoc2021::input::read_lines;
 
-struct Command(String, i32);
+struct Command(&'static str, i32);
 fn main() {
     let lines = read_lines();
 
@@ -15,7 +15,12 @@ fn main() {
             .filter(|x| x.len() == 2)
             .map(|x| (x[0].to_owned(), x[1].parse::<i32>()))
             .filter_map(|x| match x {
-                (s, Ok(i)) => Some(Command(s.to_string(), i)),
+                (s, Ok(i)) => match s.as_str() {
+                    "forward" => Some(Command("forward", i)),
+                    "down" => Some(Command("down", i)),
+                    "up" => Some(Command("up", i)),
+                    _ => None,
+                },
                 _ => None,
             })
             .collect();
@@ -30,7 +35,7 @@ fn interpret1(commands: &Vec<Command>) {
     let mut depth = 0;
     let mut position = 0;
     for command in commands {
-        match command.0.as_str() {
+        match command.0 {
             "forward" => position += command.1,
             "down" => depth += command.1,
             "up" => depth -= command.1,
@@ -49,11 +54,11 @@ fn interpret2(commands: &Vec<Command>) {
     let mut position = 0;
     let mut aim = 0;
     for command in commands {
-        match command.0.as_str() {
+        match command.0 {
             "forward" => {
                 position += command.1;
                 depth += aim * command.1
-            },
+            }
             "down" => aim += command.1,
             "up" => aim -= command.1,
             _ => panic!("unkown command"),
