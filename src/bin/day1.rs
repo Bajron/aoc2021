@@ -1,5 +1,4 @@
-use std::io;
-
+use aoc2021::input;
 fn main() {
     let list = read_ints();
 
@@ -18,6 +17,7 @@ fn main() {
 }
 
 fn read_ints() -> Vec<i64> {
+    use input::read_lines;
     if let Ok(lines) = read_lines() {
         lines
             .filter_map(|x| x.ok())
@@ -26,11 +26,6 @@ fn read_ints() -> Vec<i64> {
     } else {
         Vec::new()
     }
-}
-
-fn read_lines() -> io::Result<io::Lines<io::BufReader<io::Stdin>>> {
-    use io::BufRead;
-    Ok(io::BufReader::new(io::stdin()).lines())
 }
 
 #[allow(dead_code)]
