@@ -49,7 +49,7 @@ fn main() {
 
         let mut total = 0;
         for e in entries {
-            let mapping = work_out_mapping(&e);
+            let mapping = work_out_mapping2(&e);
             assert!(mapping.len() == 7);
 
             let number = e
@@ -86,6 +86,7 @@ fn main() {
     }
 }
 
+// How many segments used
 // '0' has 6
 // '1' has 2
 // '2' has 5
@@ -98,12 +99,24 @@ fn main() {
 // '9' has 6
 // intersect 0,6,9 to get 0,1,5,6
 
+// In how many numbers a segment is used
+// 0: 8
+// 1: 6
+// 2: 8
+// 3: 7
+// 4: 4
+// 5: 9
+// 6: 7
+
+// Segment index
+//  0
+// 1 2
+//  3
+// 4 5
+//  6
+
+#[allow(dead_code)]
 fn work_out_mapping(entry: &Entry) -> HashMap<char, usize> {
-    //  0
-    // 1 2
-    //  3
-    // 4 5
-    //  6
     let mut wires = ['X'; 7];
 
     let digits_sets: Vec<HashSet<char>> = entry
@@ -185,6 +198,61 @@ fn work_out_mapping(entry: &Entry) -> HashMap<char, usize> {
 
         // println!("{:?}", wires)
     }
+    wires
+        .iter()
+        .enumerate()
+        .map(|(i, &c)| (c, i))
+        .collect::<HashMap<char, usize>>()
+}
+
+fn work_out_mapping2(entry: &Entry) -> HashMap<char, usize> {
+    let mut wires = ['X'; 7];
+
+    let digits_sets: Vec<HashSet<char>> = entry
+        .signals
+        .iter()
+        .map(|v| v.chars().collect::<HashSet<char>>())
+        .collect();
+
+    let one = digits_sets.iter().filter(|f| f.len() == 2).next().unwrap();
+    let four = digits_sets.iter().filter(|f| f.len() == 4).next().unwrap();
+    let seven = digits_sets.iter().filter(|f| f.len() == 3).next().unwrap();
+    // let eight = digits_sets.iter().filter(|f| f.len() == 7).next().unwrap();
+
+    let mut segment_use: HashMap<char, u32> = HashMap::new();
+    entry.signals.iter().flat_map(|v| v.chars()).for_each(|c| {
+        if let Some(v) = segment_use.get_mut(&c) {
+            *v += 1
+        } else {
+            segment_use.insert(c, 1);
+        }
+    });
+
+    let top_bar = seven.difference(&one).copied().collect::<Vec<char>>();
+    assert!(top_bar.len() == 1);
+    wires[0] = top_bar[0];
+
+    segment_use.iter().for_each(|(&c, i)| match i {
+        6 => wires[1] = c,
+        4 => wires[4] = c,
+        9 => wires[5] = c,
+        8 => /* 0 or 2 */ {
+            if c != wires[0] {
+                wires[2] = c
+            }
+        }
+        7 => /* 3 or 6 */ {
+            if four.contains(&c) {
+                wires[3] = c
+            } else {
+                wires[6] = c
+            }
+        }
+        _ => (),
+    });
+
+    assert!(wires.iter().all(|&x|x!='X'), "wires is {wires:?}");
+
     wires
         .iter()
         .enumerate()
