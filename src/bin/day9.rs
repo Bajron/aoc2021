@@ -50,22 +50,15 @@ fn main() {
         //     println!("{row:?}");
         // }
 
-        let is_low = |&(y, x)| -> bool {
-            let hm = &height_map;
+        let is_low = |&(y, x): &(usize, usize)| -> bool {
             neigbours(y, x)
                 .iter()
-                .all(|&(ny, nx)| hm[y][x] < hm[ny][nx])
+                .all(|&(ny, nx)| height_map[y][x] < height_map[ny][nx])
         };
 
         let low_values = (1..=height)
             .flat_map(|y| (1..=width).map(move |x| (y, x)))
-            // .filter(is_low) // EXPLAIN why u no work??
-            .filter(|&(y, x)| -> bool {
-                let hm = &height_map;
-                neigbours(y, x)
-                    .iter()
-                    .all(|&(ny, nx)| hm[y][x] < hm[ny][nx])
-            })
+            .filter(is_low)
             .map(|(y, x)| height_map[y][x])
             .collect::<Vec<i8>>();
 
