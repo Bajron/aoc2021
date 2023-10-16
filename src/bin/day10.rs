@@ -15,11 +15,8 @@ fn main() {
     });
 
     if let Some(code_lines) = input {
-        let corrupted_score_mapping: HashMap<char, i32> =
-            vec![(')', 3), (']', 57), ('}', 1197), ('>', 25137)]
-                .iter()
-                .copied()
-                .collect();
+        let corrupted_score_mapping =
+            HashMap::from([(')', 3), (']', 57), ('}', 1197), ('>', 25137)]);
 
         let results: Vec<Result> = code_lines.iter().map(process).collect();
         let corrupted_score: i32 = results
@@ -33,11 +30,7 @@ fn main() {
 
         println!("Corrupted score: {corrupted_score}");
 
-        let complete_score_mapping: HashMap<char, i32> =
-            vec![('(', 1), ('[', 2), ('{', 3), ('<', 4)]
-                .iter()
-                .copied()
-                .collect();
+        let complete_score_mapping = HashMap::from([('(', 1), ('[', 2), ('{', 3), ('<', 4)]);
         let mut autocomplete_scores = results
             .iter()
             .filter_map(|x| match x {
