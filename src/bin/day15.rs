@@ -70,7 +70,7 @@ fn analyse_map(map: Vec<Vec<u8>>) {
     let mut shortest = vec![vec![usize::MAX; width]; height];
     shortest[0][0] = 0;
 
-    for _ in 0..15 {
+    for _ in 0..12 {
         for y in 0..height {
             for x in 0..width {
                 for n in neighbors((y, x)) {
@@ -88,10 +88,17 @@ fn analyse_map(map: Vec<Vec<u8>>) {
     println!("Pre check done.");
 
     println!("Verifying (might take a long time)");
-    // This would be exhaustive search, but it mostly checks optimal paths to nothing important...
-    dfs(0, (0, 0), &map, &mut shortest, &neighbors, &|(y, x)| {
-        y == height - 1 && x == width - 1
-    });
+    let mut visited = vec![vec![false; width]; height];
+    // Exhaustive search (initial approximations help not to blow up the stack)
+    dfs(
+        0,
+        (0, 0),
+        &map,
+        &mut shortest,
+        &mut visited,
+        &neighbors,
+        &|(y, x)| y == height - 1 && x == width - 1,
+    );
     let score = shortest[height - 1][width - 1];
     println!("Best {score}")
 }
@@ -101,6 +108,7 @@ fn dfs<F, G>(
     pos: (usize, usize),
     map: &Vec<Vec<u8>>,
     shortest: &mut Vec<Vec<usize>>,
+    visited: &mut Vec<Vec<bool>>,
     neighbours: &F,
     is_finish: &G,
 ) where
@@ -110,6 +118,10 @@ fn dfs<F, G>(
     if value > shortest[pos.0][pos.1] {
         return;
     }
+    if value == shortest[pos.0][pos.1] && visited[pos.0][pos.1] {
+        return;
+    }
+    visited[pos.0][pos.1] = true;
     shortest[pos.0][pos.1] = value;
 
     if is_finish(pos) {
@@ -123,6 +135,7 @@ fn dfs<F, G>(
             n,
             map,
             shortest,
+            visited,
             neighbours,
             is_finish,
         );
