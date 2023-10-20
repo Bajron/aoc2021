@@ -83,9 +83,12 @@ fn analyse_map(map: Vec<Vec<u8>>) {
         }
         println!("Approx {}", shortest[height - 1][width - 1]);
     }
+    // Result is probably fine after 10th iteration
+    // because of the limited values (1-9) and regular structure of the graph
+    println!("Pre check done.");
 
-    println!("Pre check done");
-
+    println!("Verifying (might take a long time)");
+    // This would be exhaustive search, but it mostly checks optimal paths to nothing important...
     dfs(0, (0, 0), &map, &mut shortest, &neighbors, &|(y, x)| {
         y == height - 1 && x == width - 1
     });
@@ -104,10 +107,9 @@ fn dfs<F, G>(
     F: Fn((usize, usize)) -> Vec<(usize, usize)>,
     G: Fn((usize, usize)) -> bool,
 {
-    if value >= shortest[pos.0][pos.1] {
+    if value > shortest[pos.0][pos.1] {
         return;
     }
-
     shortest[pos.0][pos.1] = value;
 
     if is_finish(pos) {
