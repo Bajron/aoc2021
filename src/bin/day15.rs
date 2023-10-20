@@ -32,6 +32,7 @@ fn main() {
         }
 
         analyse_map(big_map);
+        analyse_map(map);
     }
 }
 
