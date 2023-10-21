@@ -1,3 +1,5 @@
+use core::panic;
+
 use aoc2021::input::*;
 
 fn main() {
@@ -32,23 +34,34 @@ fn main() {
             })
             .collect::<String>();
 
-        let packets = read_from_iter(bits.chars());
+        let packets = read_from_iter(bits.chars().by_ref());
 
         for p in &packets {
             println!("Packet of type {}", p.kind);
+            match &p.contents {
+                PacketContent::Number(n) => println!("Contains number {}", n),
+                PacketContent::Packets(p) => println!("Contains {} subpackets", p.len()),
+            }
         }
+
+        println!("{packets:?}");
 
         let sv: usize = packets.iter().map(|p| p.sum_versions()).sum();
         println!("Versions sum: {sv}");
+        if let Some(first_packet) = packets.first() {
+            println!(
+                "Evaluation of the first packet is {}",
+                first_packet.evaluate()
+            );
+        }
     }
 }
 
-fn read_from_iter<T>(mut it: T) -> Vec<Packet>
+fn read_from_iter<T>(itr: &mut T) -> Vec<Packet>
 where
     T: Iterator<Item = char>,
 {
     let mut packets: Vec<Packet> = vec![];
-    let itr = &mut it;
     loop {
         if let Some(packet) = extract_packet(itr) {
             packets.push(packet);
@@ -106,7 +119,7 @@ where
             if data_bits.len() % 4 != 0 {
                 return None;
             }
-            let number = u32::from_str_radix(&data_bits.as_str(), 2).unwrap();
+            let number = u128::from_str_radix(&data_bits.as_str(), 2).unwrap();
             Packet {
                 version: version,
                 kind: kind,
@@ -116,15 +129,19 @@ where
         _ => {
             if let Some(len_type) = itr.next() {
                 if len_type == '0' {
+                    //return None;
                     let len_bits = itr.take(15).collect::<String>();
                     if len_bits.len() != 15 {
                         return None;
                     }
                     let inside_bits = usize::from_str_radix(len_bits.as_str(), 2).unwrap();
+                    // A dream to pass `itr.take(inside_bits)` as the argument failed with some trait recursion blowing up...
+                    let sub_bits = itr.take(inside_bits).collect::<String>();
                     Packet {
-                        version: version,
-                        kind: kind,
-                        contents: PacketContent::Packets(read_from_iter(itr.take(inside_bits))),
+                        version,
+                        kind,
+                        contents: PacketContent::Packets(read_from_iter(sub_bits.chars().by_ref())),
+                        // contents: PacketContent::Packets(read_from_iter(itr.take(inside_bits).by_ref())),
                     }
                 } else {
                     let len_bits = itr.take(11).collect::<String>();
@@ -133,8 +150,8 @@ where
                     }
                     let inside_packets = u32::from_str_radix(len_bits.as_str(), 2).unwrap();
                     Packet {
-                        version: version,
-                        kind: kind,
+                        version,
+                        kind,
                         contents: PacketContent::Packets(read_n_from_iter(itr, inside_packets)),
                     }
                 }
@@ -146,14 +163,16 @@ where
     Some(packet)
 }
 
+#[derive(Debug)]
 struct Packet {
     version: u32,
     kind: u32,
     contents: PacketContent,
 }
 
+#[derive(Debug)]
 enum PacketContent {
-    Number(u32),
+    Number(u128),
     Packets(Vec<Packet>),
 }
 
@@ -161,8 +180,58 @@ impl Packet {
     fn sum_versions(&self) -> usize {
         self.version as usize
             + match &self.contents {
-                PacketContent::Packets(p) => p.iter().map(|p| p.version as usize).sum(),
+                PacketContent::Packets(p) => p.iter().map(|p| p.sum_versions() as usize).sum(),
                 _ => 0,
             }
+    }
+
+    fn evaluate(&self) -> u128 {
+        if self.kind == 4 {
+            if let PacketContent::Number(v) = self.contents {
+                return v;
+            } else {
+                panic!("Malformed value packet");
+            }
+        } else if let PacketContent::Packets(p) = &self.contents {
+            match self.kind {
+                0 => p.iter().map(|p| p.evaluate()).sum(),
+                1 => p.iter().map(|p| p.evaluate()).product(),
+                2 => p.iter().map(|p| p.evaluate()).min().unwrap(),
+                3 => p.iter().map(|p| p.evaluate()).max().unwrap(),
+                5 => match &p[0..2] {
+                    [lhs, rhs] => {
+                        if lhs.evaluate() > rhs.evaluate() {
+                            1
+                        } else {
+                            0
+                        }
+                    }
+                    _ => panic!("Malformed gt packet"),
+                },
+                6 => match &p[0..2] {
+                    [lhs, rhs] => {
+                        if lhs.evaluate() < rhs.evaluate() {
+                            1
+                        } else {
+                            0
+                        }
+                    }
+                    _ => panic!("Malformed lt packet"),
+                },
+                7 => match &p[0..2] {
+                    [lhs, rhs] => {
+                        if lhs.evaluate() == rhs.evaluate() {
+                            1
+                        } else {
+                            0
+                        }
+                    }
+                    _ => panic!("Malformed eq packet"),
+                },
+                _ => panic!("Invalid packet type in the system {}", self.kind),
+            }
+        } else {
+            panic!("Malformed packet")
+        }
     }
 }
