@@ -1,14 +1,16 @@
-fn monad<T>(input: T) -> i128
+type Register = i32;
+
+fn monad<T>(input: T) -> Register
 where
     T: IntoIterator<Item = i32>,
 {
-    let mut w = 0_i128;
-    let mut x = 0_i128;
-    let mut y = 0_i128;
-    let mut z = 0_i128;
+    let mut w: Register;
+    let mut x: Register = 0;
+    let mut y: Register = 0;
+    let mut z: Register = 0;
 
     let mut it = input.into_iter();
-    let mut next = move || it.next().unwrap() as i128;
+    let mut next = move || it.next().unwrap() as Register;
 
     /*
 
@@ -17,7 +19,7 @@ where
         -e 's/mul\s+([wxyz])\s+(\S+)/\1 *= \2;/' \
         -e 's/div\s+([wxyz])\s+(\S+)/\1 \/= \2;/' \
         -e 's/mod\s+([wxyz])\s+(\S+)/\1 %= \2;/' \
-        -e 's/eql\s+([wxyz])\s+(\S+)/if \1 == \2 {1} else {0};/' \
+        -e 's/eql\s+([wxyz])\s+(\S+)/\1 = if \1 == \2 {1} else {0};/' \
         -e 's/inp\s+([wxyz])/\1 = next();/'
 
     */
@@ -29,16 +31,8 @@ where
     x %= 26;
     z /= 1;
     x += 13;
-    if x == w {
-        1
-    } else {
-        0
-    };
-    if x == 0 {
-        1
-    } else {
-        0
-    };
+    x = if x == w { 1 } else { 0 };
+    x = if x == 0 { 1 } else { 0 };
     y *= 0;
     y += 25;
     y *= x;
@@ -55,16 +49,8 @@ where
     x %= 26;
     z /= 1;
     x += 15;
-    if x == w {
-        1
-    } else {
-        0
-    };
-    if x == 0 {
-        1
-    } else {
-        0
-    };
+    x = if x == w { 1 } else { 0 };
+    x = if x == 0 { 1 } else { 0 };
     y *= 0;
     y += 25;
     y *= x;
@@ -81,16 +67,8 @@ where
     x %= 26;
     z /= 1;
     x += 15;
-    if x == w {
-        1
-    } else {
-        0
-    };
-    if x == 0 {
-        1
-    } else {
-        0
-    };
+    x = if x == w { 1 } else { 0 };
+    x = if x == 0 { 1 } else { 0 };
     y *= 0;
     y += 25;
     y *= x;
@@ -107,16 +85,8 @@ where
     x %= 26;
     z /= 1;
     x += 11;
-    if x == w {
-        1
-    } else {
-        0
-    };
-    if x == 0 {
-        1
-    } else {
-        0
-    };
+    x = if x == w { 1 } else { 0 };
+    x = if x == 0 { 1 } else { 0 };
     y *= 0;
     y += 25;
     y *= x;
@@ -133,16 +103,8 @@ where
     x %= 26;
     z /= 26;
     x += -16;
-    if x == w {
-        1
-    } else {
-        0
-    };
-    if x == 0 {
-        1
-    } else {
-        0
-    };
+    x = if x == w { 1 } else { 0 };
+    x = if x == 0 { 1 } else { 0 };
     y *= 0;
     y += 25;
     y *= x;
@@ -159,16 +121,8 @@ where
     x %= 26;
     z /= 26;
     x += -11;
-    if x == w {
-        1
-    } else {
-        0
-    };
-    if x == 0 {
-        1
-    } else {
-        0
-    };
+    x = if x == w { 1 } else { 0 };
+    x = if x == 0 { 1 } else { 0 };
     y *= 0;
     y += 25;
     y *= x;
@@ -185,16 +139,8 @@ where
     x %= 26;
     z /= 26;
     x += -6;
-    if x == w {
-        1
-    } else {
-        0
-    };
-    if x == 0 {
-        1
-    } else {
-        0
-    };
+    x = if x == w { 1 } else { 0 };
+    x = if x == 0 { 1 } else { 0 };
     y *= 0;
     y += 25;
     y *= x;
@@ -211,16 +157,8 @@ where
     x %= 26;
     z /= 1;
     x += 11;
-    if x == w {
-        1
-    } else {
-        0
-    };
-    if x == 0 {
-        1
-    } else {
-        0
-    };
+    x = if x == w { 1 } else { 0 };
+    x = if x == 0 { 1 } else { 0 };
     y *= 0;
     y += 25;
     y *= x;
@@ -237,16 +175,8 @@ where
     x %= 26;
     z /= 1;
     x += 10;
-    if x == w {
-        1
-    } else {
-        0
-    };
-    if x == 0 {
-        1
-    } else {
-        0
-    };
+    x = if x == w { 1 } else { 0 };
+    x = if x == 0 { 1 } else { 0 };
     y *= 0;
     y += 25;
     y *= x;
@@ -263,16 +193,8 @@ where
     x %= 26;
     z /= 26;
     x += -10;
-    if x == w {
-        1
-    } else {
-        0
-    };
-    if x == 0 {
-        1
-    } else {
-        0
-    };
+    x = if x == w { 1 } else { 0 };
+    x = if x == 0 { 1 } else { 0 };
     y *= 0;
     y += 25;
     y *= x;
@@ -289,16 +211,8 @@ where
     x %= 26;
     z /= 26;
     x += -8;
-    if x == w {
-        1
-    } else {
-        0
-    };
-    if x == 0 {
-        1
-    } else {
-        0
-    };
+    x = if x == w { 1 } else { 0 };
+    x = if x == 0 { 1 } else { 0 };
     y *= 0;
     y += 25;
     y *= x;
@@ -315,16 +229,8 @@ where
     x %= 26;
     z /= 26;
     x += -11;
-    if x == w {
-        1
-    } else {
-        0
-    };
-    if x == 0 {
-        1
-    } else {
-        0
-    };
+    x = if x == w { 1 } else { 0 };
+    x = if x == 0 { 1 } else { 0 };
     y *= 0;
     y += 25;
     y *= x;
@@ -341,16 +247,8 @@ where
     x %= 26;
     z /= 1;
     x += 12;
-    if x == w {
-        1
-    } else {
-        0
-    };
-    if x == 0 {
-        1
-    } else {
-        0
-    };
+    x = if x == w { 1 } else { 0 };
+    x = if x == 0 { 1 } else { 0 };
     y *= 0;
     y += 25;
     y *= x;
@@ -367,16 +265,8 @@ where
     x %= 26;
     z /= 26;
     x += -15;
-    if x == w {
-        1
-    } else {
-        0
-    };
-    if x == 0 {
-        1
-    } else {
-        0
-    };
+    x = if x == w { 1 } else { 0 };
+    x = if x == 0 { 1 } else { 0 };
     y *= 0;
     y += 25;
     y *= x;
@@ -392,22 +282,37 @@ where
     z
 }
 
+use rand::distributions::Uniform;
+use rand::{thread_rng, Rng};
+
 fn main() {
     let mut i = 100_000_000_000_000_i128;
-    let mut check = 1_i128;
+    let mut check: Register = Register::MAX;
+    let mut best: Register = Register::MAX;
     let mut s: Vec<i32>;
     while check != 0 {
         i -= 1;
-        s = i
-            .to_string()
-            .chars()
-            .filter_map(|c| c.to_digit(10))
-            .map(|d| d as i32)
-            .collect::<Vec<i32>>();
-        check = monad(s);
 
-        if i % 1000_000_000 == 0 {
-            println!("{i} {check}");
+        // s = i
+        //     .to_string()
+        //     .chars()
+        //     .filter_map(|c| c.to_digit(10))
+        //     .map(|d| d as i32)
+        //     .collect::<Vec<i32>>();
+        // if s.iter().any(|&d| d == 0) {
+        //     continue;
+        // }
+
+        s = thread_rng()
+            .sample_iter(Uniform::new(1, 10))
+            .take(14)
+            .collect::<Vec<i32>>();
+
+        check = monad(s.clone());
+
+        if check.abs() < best {
+            println!("{:?} {check}", s);
+            best = check.abs();
         }
     }
 
