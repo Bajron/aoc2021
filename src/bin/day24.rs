@@ -286,7 +286,8 @@ where
 // use rand::{thread_rng, Rng};
 
 fn main() {
-    let mut i = 91599994399395_i128 + 1;
+    // let mut i = 91599994399395_i128 + 1;
+    let mut i = 71111591176151_i128 + 1;
     let mut check: Register = Register::MAX;
     let mut best: Register = Register::MAX;
     let mut s: Vec<i32>;
