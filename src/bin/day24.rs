@@ -282,31 +282,31 @@ where
     z
 }
 
-use rand::distributions::Uniform;
-use rand::{thread_rng, Rng};
+// use rand::distributions::Uniform;
+// use rand::{thread_rng, Rng};
 
 fn main() {
-    let mut i = 100_000_000_000_000_i128;
+    let mut i = 91599994399395_i128 + 1;
     let mut check: Register = Register::MAX;
     let mut best: Register = Register::MAX;
     let mut s: Vec<i32>;
     while check != 0 {
         i -= 1;
 
-        // s = i
-        //     .to_string()
-        //     .chars()
-        //     .filter_map(|c| c.to_digit(10))
-        //     .map(|d| d as i32)
-        //     .collect::<Vec<i32>>();
-        // if s.iter().any(|&d| d == 0) {
-        //     continue;
-        // }
-
-        s = thread_rng()
-            .sample_iter(Uniform::new(1, 10))
-            .take(14)
+        s = i
+            .to_string()
+            .chars()
+            .filter_map(|c| c.to_digit(10))
+            .map(|d| d as i32)
             .collect::<Vec<i32>>();
+        if s.iter().any(|&d| d == 0) {
+            continue;
+        }
+
+        // s = thread_rng()
+        //     .sample_iter(Uniform::new(1, 10))
+        //     .take(14)
+        //     .collect::<Vec<i32>>();
 
         check = monad(s.clone());
 

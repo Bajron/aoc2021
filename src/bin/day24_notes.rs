@@ -1,5 +1,3 @@
-use std::collections::HashSet;
-
 type Register = i32;
 
 fn monad(input: &Vec<i32>) -> Register {
@@ -64,7 +62,7 @@ fn monad(input: &Vec<i32>) -> Register {
     x = z % 26 - 16; // w3 + 16 - 16 = w3
     z /= 26; // OPTIMIZE: w3 does not matter?
              // z = 26 * (26 * (w0 + 5) + w1 + 14) + w2 + 15
-    x = if x != w { 1 } else { 0 }; // w4 != w3 ?
+    x = if x != w { 1 } else { 0 }; // w4 == w3
     y = 25 * x + 1; //     26 or 1
     z *= y;
     y = (w + 8) * x; // w + 8 or 0
@@ -84,6 +82,7 @@ fn monad(input: &Vec<i32>) -> Register {
     // or
     // z =        26 * (w0 + 5) + w1 + 14
     x = if x != w { 1 } else { 0 }; // w5 relation with w4 or w2; w4-3 != w5 or w2 + 4 != w5
+                                    // consider only shortest from above, so w2 + 4 == w5 to get 0
     y = 25 * x + 1;
     z *= y;
     y = (w + 9) * x;
@@ -100,20 +99,19 @@ fn monad(input: &Vec<i32>) -> Register {
     w = next(); // w6
     x = z % 26 - 6;
     z /= 26; // OPTIMIZE: w5 does not matter?
-    x = if x != w { 1 } else { 0 }; // w6 ~ w2, w1, w5
+    x = if x != w { 1 } else { 0 }; // w1 + 8 == w6
     y = 25 * x + 1;
     z *= y;
-    y = w + 2;
-    y *= x;
+    y = (w + 2) + x;
     z += y;
+    // shortest z = (w0 + 5)
 
     w = next(); // w7
     x = z % 26 + 11;
     x = if x != w { 1 } else { 0 }; // always 1, x >= 11
     y = 25 * x + 1;
     z *= y;
-    y = w + 13;
-    y *= x;
+    y = (w + 13) * x;
     z += y;
 
     // z8 = 26 * (z7) + w7 + 13
@@ -123,54 +121,66 @@ fn monad(input: &Vec<i32>) -> Register {
     x = if x != w { 1 } else { 0 }; // always 1, x >= 10
     y = 25 * x + 1;
     z *= y;
-    y = w + 16;
-    y *= x;
+    y = (w + 16) * x;
     z += y;
 
     // z8 = 26 * (26 * (z7) + w7 + 13) + w8 + 16
+    // shortest z = 26 * (26 * (w0 + 5) + w7 + 13) + w8 + 16
 
     w = next(); // w9
     x = z % 26 - 10;
     z /= 26; // OPTIMIZE: w8 does not matter?
-    x = if x != w { 1 } else { 0 }; // w8 ~ w9
+    x = if x != w { 1 } else { 0 }; // w8 + 6 == w9
     y = 25 * x + 1;
     z *= y;
-    y = w + 6;
-    y *= x;
+    y = (w + 6) * x;
     z += y;
+    // shortest z = 26 * (w0 + 5) + w7 + 13
 
     w = next(); // w10
     x = z % 26 - 8;
     z /= 26; // OPTIMIZE: w9 does not matter?
-    x = if x != w { 1 } else { 0 }; // w10
+    x = if x != w { 1 } else { 0 }; // w7 + 5 == w10
     y = 25 * x + 1;
     z *= y;
-    y = w + 6;
-    y *= x;
+    y = (w + 6) * x;
     z += y;
+    // shortest z = w0 + 5
 
     w = next(); // w11
     x = z % 26 - 11;
     z /= 26; // OPTIMIZE: w10 does not matter?
-    x = if x != w { 1 } else { 0 };
+    x = if x != w { 1 } else { 0 }; // w11 == w0 - 6
     y = 25 * x + 1;
     z *= y;
     y = (w + 9) * x;
     z += y;
+
+    // shortest z = 0
+
+    /////// ? enlightment ?
+    // Hmmm.... So we always need to get zeros in the reducing steps, otherwise it doesn't reach 0
+    ///////
+
+    // Here we will always add, then we will reduce, but the only way to get 0
+    // is to have 0 at this point in the first place.
 
     w = next(); // w12
     x = z % 26 + 12;
     x = if x != w { 1 } else { 0 }; // always 1, x >= 12
     y = 25 * x + 1;
     z *= y;
-    y = w + 11;
-    y *= x;
+    y = (w + 11) * x;
     z += y;
 
+    // shortest z = w12 + 11
+
+    // z here is always at least w12 + 11, if it is (26*k + r) we cannot do anything to make it 0
     w = next(); // w13
     x = z % 26 - 15;
     z /= 26; // OPTIMIZE: w12 does not matter?
-    x = if x != w { 1 } else { 0 };
+             // If we want to have 0 in the end, this must be zero, otherise we will add something to z
+    x = if x != w { 1 } else { 0 }; // 0 if w12 - 4 == w13
     y = 25 * x + 1; // y = 26 or 1
     z *= y;
     y = (w + 5) * x; // y == 6..=14 or 0
@@ -181,6 +191,25 @@ fn monad(input: &Vec<i32>) -> Register {
     // we want z == 0
 
     // ----------------------------
+
+    // From the requirement of always needing to reduce
+    // w0                                 in 7..=9      9
+    // w1                                 in 1..=1      1
+    // w2                                 in 1..=5      5
+    // w3                                               9
+    // w4: w3                                           9
+    // w5: w2 + 4 -> w2 in 1..=5                        9
+    // w6: w1 + 8 -> w1 = 1                             9
+    // w7                                 in 1..=4      4
+    // w8                                 in 1..=3      3
+    // w9: w8 + 6 -> w8 in 1..=3                        9
+    // w10: w7 + 5 -> w7 in 1..=4                       9
+    // w11: w0 - 6 -> w0 in 7..=9                       3
+    // w12                                in 5..=9      9
+    // w13: w12 - 4 -> w12 in 5..=9                     5
+
+    // 91599994399395
+
     z
 }
 
@@ -208,6 +237,7 @@ fn possible_monad(input: &Vec<i32>) -> bool {
 
     possible_z.push(z);
 
+    assert!(w3 == 0);
     let w4 = next();
     possible_z_next.clear();
     for pos_z in &possible_z {
@@ -217,6 +247,7 @@ fn possible_monad(input: &Vec<i32>) -> bool {
     }
     std::mem::swap(&mut possible_z, &mut possible_z_next);
 
+    assert!(w4 == 0);
     let w5 = next();
     possible_z_next.clear();
     for pos_z in &possible_z {
@@ -226,6 +257,7 @@ fn possible_monad(input: &Vec<i32>) -> bool {
     }
     std::mem::swap(&mut possible_z, &mut possible_z_next);
 
+    assert!(w5 == 0);
     let w6 = next();
     possible_z_next.clear();
     for pos_z in &possible_z {
@@ -245,10 +277,11 @@ fn possible_monad(input: &Vec<i32>) -> bool {
     let w8: i32 = next();
     possible_z_next.clear();
     for pos_z in &possible_z {
-        possible_z_next.push(pos_z / 26 + w8 + 16);
+        possible_z_next.push(26 * pos_z + w8 + 16);
     }
     std::mem::swap(&mut possible_z, &mut possible_z_next);
 
+    assert!(w8 == 0);
     let w9 = next();
     possible_z_next.clear();
     for pos_z in &possible_z {
@@ -258,6 +291,7 @@ fn possible_monad(input: &Vec<i32>) -> bool {
     }
     std::mem::swap(&mut possible_z, &mut possible_z_next);
 
+    assert!(w9 == 0);
     let w10 = next();
     possible_z_next.clear();
     for pos_z in &possible_z {
@@ -267,6 +301,7 @@ fn possible_monad(input: &Vec<i32>) -> bool {
     }
     std::mem::swap(&mut possible_z, &mut possible_z_next);
 
+    assert!(w10 == 0);
     let w11 = next();
     possible_z_next.clear();
     for pos_z in &possible_z {
@@ -283,6 +318,7 @@ fn possible_monad(input: &Vec<i32>) -> bool {
     }
     std::mem::swap(&mut possible_z, &mut possible_z_next);
 
+    assert!(w12 == 0);
     let w13 = next();
     possible_z_next.clear();
     for pos_z in &possible_z {
@@ -293,12 +329,13 @@ fn possible_monad(input: &Vec<i32>) -> bool {
     std::mem::swap(&mut possible_z, &mut possible_z_next);
 
     assert!(possible_z.len() == 128);
-    println!("{possible_z:?}");
+    // println!("{possible_z:?}");
     possible_z.iter().any(|&z| z == 0)
 }
 
 fn main() {
     let mut i = 10_000_000;
+    // 4 782 969, less then a half is still possible, not that great filtering...
     let mut check: Register = Register::MAX;
     let mut best: Register = Register::MAX;
 
@@ -308,7 +345,7 @@ fn main() {
         s[i] = 0;
     }
     println!("{s:?}");
-
+    let mut possible = 0;
     while check != 0 && i >= 1_111_111 {
         i -= 1;
 
@@ -331,6 +368,8 @@ fn main() {
         if !possible_monad(&s) {
             continue;
         }
+        possible += 1;
+
         println!("{i}...");
 
         let mut j = 10_000_000;
@@ -359,7 +398,11 @@ fn main() {
                 best = check;
             }
         }
+        // Fix for the other iterations
+        for i in not_in_z {
+            s[i] = 0;
+        }
     }
-
+    println!("Possible roughly {possible}");
     println!("Got it: {i}")
 }
